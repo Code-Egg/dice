@@ -1,5 +1,5 @@
 {
-  "name": "Fate Roller AI",
-  "description": "A fancy 3D dice rolling app featuring a classic D6 and a mystical D21, with AI-powered fortune telling.",
+  "name": "Fate Roller",
+  "description": "A fancy 3D dice rolling app featuring a classic D6 and a mystical D21.",
   "requestFramePermissions": []
 }

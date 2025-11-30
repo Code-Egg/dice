@@ -1,19 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import confetti from 'canvas-confetti';
-import { Sparkles, Dices, RotateCcw, Bot } from 'lucide-react';
+import { Dices, RotateCcw } from 'lucide-react';
 
 import Die6 from './components/Die6';
 import Die21 from './components/Die21';
-import { DiceType, RollResult, AiFortune } from './types';
-import { getRollFortune } from './services/geminiService';
+import { DiceType } from './types';
 
 const App: React.FC = () => {
   const [diceType, setDiceType] = useState<DiceType>(DiceType.D6);
   const [rollValue, setRollValue] = useState<number>(1);
   const [isRolling, setIsRolling] = useState<boolean>(false);
-  const [useAi, setUseAi] = useState<boolean>(false);
-  const [fortune, setFortune] = useState<AiFortune | null>(null);
-  const [isAiLoading, setIsAiLoading] = useState<boolean>(false);
 
   // Sound effect placeholders (real apps would import audio files)
   const triggerConfetti = () => {
@@ -25,21 +21,15 @@ const App: React.FC = () => {
     });
   };
 
-  const handleRoll = useCallback(async () => {
+  const handleRoll = useCallback(() => {
     if (isRolling) return;
 
     setIsRolling(true);
-    setFortune(null); // Clear previous fortune
-
-    // Animate numbers while rolling logic is handled in components visually, 
-    // but we can update state rapidly for D21 "slot machine" effect if we wanted.
-    // Here we mainly wait for the animation time.
     
-    // Play sound logic would go here
-
+    // Animate numbers while rolling logic is handled in components visually
     const rollDuration = 800; // ms matches CSS transition
 
-    setTimeout(async () => {
+    setTimeout(() => {
       const newValue = Math.floor(Math.random() * diceType) + 1;
       setRollValue(newValue);
       setIsRolling(false);
@@ -48,24 +38,9 @@ const App: React.FC = () => {
       if (newValue === diceType || newValue === 1) {
          triggerConfetti();
       }
-
-      // AI Fortune Fetch
-      if (useAi) {
-        setIsAiLoading(true);
-        const fortuneResult = await getRollFortune(newValue, diceType);
-        setFortune(fortuneResult);
-        setIsAiLoading(false);
-      }
-
     }, rollDuration);
 
-  }, [diceType, isRolling, useAi]);
-
-  const toggleDiceType = () => {
-    setDiceType(prev => prev === DiceType.D6 ? DiceType.D21 : DiceType.D6);
-    setRollValue(1); // Reset
-    setFortune(null);
-  };
+  }, [diceType, isRolling]);
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden relative">
@@ -73,22 +48,10 @@ const App: React.FC = () => {
       {/* Ambient Background Glow */}
       <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[120px] opacity-20 pointer-events-none transition-colors duration-1000 ${diceType === DiceType.D6 ? 'bg-blue-500' : 'bg-purple-600'}`}></div>
 
-      <header className="absolute top-6 left-0 w-full flex justify-between px-6 z-20">
+      <header className="absolute top-6 left-0 w-full flex justify-center px-6 z-20">
          <h1 className="text-xl md:text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-200 to-slate-400">
            Fate Roller
          </h1>
-         <div className="flex items-center gap-3">
-             <span className={`text-xs font-semibold uppercase tracking-wider ${useAi ? 'text-green-400' : 'text-slate-500'}`}>
-               AI Oracle {useAi ? 'ON' : 'OFF'}
-             </span>
-             <button 
-               onClick={() => setUseAi(!useAi)}
-               className={`p-2 rounded-full transition-all duration-300 ${useAi ? 'bg-green-500/20 text-green-400 ring-2 ring-green-500/50' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
-               title="Toggle AI Interpretation"
-             >
-               <Bot size={20} />
-             </button>
-         </div>
       </header>
 
       {/* Main Game Area */}
@@ -103,28 +66,8 @@ const App: React.FC = () => {
            )}
         </div>
 
-        {/* Oracle Message */}
-        <div className="min-h-[80px] w-full px-4 flex items-center justify-center">
-          {isAiLoading ? (
-             <div className="flex items-center gap-2 text-slate-400 animate-pulse">
-               <Sparkles size={16} />
-               <span className="text-sm">Consulting the stars...</span>
-             </div>
-          ) : fortune ? (
-            <div className={`text-center p-4 rounded-lg border backdrop-blur-sm transition-all animate-in fade-in slide-in-from-bottom-4 duration-500
-              ${fortune.tone === 'lucky' ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-200' : 
-                fortune.tone === 'ominous' ? 'bg-red-500/10 border-red-500/30 text-red-200' : 
-                'bg-slate-700/30 border-slate-600 text-slate-200'}
-            `}>
-               <p className="text-lg font-medium font-serif italic">"{fortune.text}"</p>
-            </div>
-          ) : (
-            <p className="text-slate-500 text-sm italic">Roll to reveal your fate...</p>
-          )}
-        </div>
-
         {/* Controls */}
-        <div className="flex flex-col gap-6 w-full px-4">
+        <div className="flex flex-col gap-6 w-full px-4 mt-8">
            {/* Roll Button */}
            <button
              onClick={handleRoll}
@@ -167,7 +110,7 @@ const App: React.FC = () => {
       </main>
 
       <footer className="absolute bottom-4 text-slate-600 text-xs text-center w-full">
-         <p>Powered by React & Gemini 2.5</p>
+         <p>Powered by React</p>
       </footer>
     </div>
   );
